@@ -162,3 +162,10 @@ def task_without_bind():
     else:
         print('Task was successful!')
         time.sleep(10)
+
+@app.task(
+    bind=True,
+    rate_limit="2/m",
+)
+def task_with_rate_limit(self):
+    print("Start task" + self.request.id)
