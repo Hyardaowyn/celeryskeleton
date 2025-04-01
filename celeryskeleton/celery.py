@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 @app.task(bind=True)
 def raiseexceptiontask(self):
-    myint= random.randint(1,5);
+    myint = random.randint(1, 5)
     if myint != 1:
         time.sleep(60)
         raise self.retry(exc=Exception(myint), countdown=10, max_retries=7)
@@ -21,7 +21,6 @@ def raiseexceptiontask(self):
         print("Task completed successfully")
 
 
-#raiseexceptiontask.delay()
 @app.task(bind=True)
 def apply_async_task(self):
     logger.error("async")
@@ -33,4 +32,3 @@ def sleep_task(self):
     time.sleep(5)
     logger.error("end sleep")
 
-apply_async_task.delay()
