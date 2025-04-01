@@ -218,3 +218,15 @@ def task_with_jitter(self):
     print("Starting Task")
     time.sleep(5)
     raise Exception('This is an exception')
+
+@app.task(bind=True,
+          max_retries=3,
+          retry_backoff=120,
+          retry_backoff_max=120 + 1,
+          retry_jitter=False,
+          autoretry_for=(Exception,)
+          )
+def long_running_task(self):
+    print('Start a long-running task')
+    time.sleep(240)
+    print('End the long-running task')
