@@ -146,3 +146,19 @@ def task_without_ack(self):
     else:
         time.sleep(30)
         print("Task was successful!")
+
+@app.task(
+    max_retries=2,
+    retry_backoff=120,
+    retry_jitter=False,
+    autoretry_for=(Exception,)
+)
+def task_without_bind():
+    myint = random.randint(1,6)
+    if myint != 6:
+        print('Task has failed!')
+        time.sleep(60)
+        raise Exception('Exception!')
+    else:
+        print('Task was successful!')
+        time.sleep(10)
