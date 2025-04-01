@@ -185,3 +185,22 @@ def task_with_rate_limit_and_retry(self):
         raise Exception("Raising exception!!")
     else:
         print("Task was successful!")
+
+@app.task(
+    track_started=True,
+    bind=True,
+    max_retries=3,
+    retry_backoff=120,
+    retry_jitter=False,
+    autoretry_for=(Exception,),
+    queue="TroubleshootingCelery-dlq",
+)
+def task_with_retry_on_diff_queue(self):
+    myint = random.randint(1, 5)
+    if myint != 1:
+        print('Task has failed!')
+        time.sleep(30)
+        raise Exception("Raising exception!!")
+    else:
+        print("Task was successful!")
+        time.sleep(10)
