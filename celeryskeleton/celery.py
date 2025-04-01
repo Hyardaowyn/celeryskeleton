@@ -169,3 +169,19 @@ def task_without_bind():
 )
 def task_with_rate_limit(self):
     print("Start task" + self.request.id)
+
+@app.task(
+    bind=True,
+    rate_limit="1/m",
+    max_retries=3,
+    retry_backoff=120,
+    retry_jitter=False,
+    autoretry_for=(Exception,),
+)
+def task_with_rate_limit_and_retry(self):
+    myint = random.randint(1, 5)
+    if myint != 1:
+        print('Task has failed!')
+        raise Exception("Raising exception!!")
+    else:
+        print("Task was successful!")
