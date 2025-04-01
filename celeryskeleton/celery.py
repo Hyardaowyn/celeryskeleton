@@ -93,3 +93,22 @@ def test_4(self):
             countdown=((self.request.retries + 1) * 1200),  # Exponential backoff, max 480 seconds
             max_retries=3
         )
+
+@app.task(bind=True,
+          max_retries=3,
+          retry_backoff=120,
+          retry_backoff_max=480 + 1,
+          retry_jitter=False,
+          autoretry_for=(Exception,)
+          )
+def task_with_catch(self):
+    try:
+        myint = random.randint(1, 5)
+        if myint != 1:
+            time.sleep(30)
+            raise Exception("Something went wrong!")
+        else:
+            print("Task completed successfully")
+    except Exception as exc:
+        print("Caught the Exception!")
+        #raise Exception Used in the second run in task 5
