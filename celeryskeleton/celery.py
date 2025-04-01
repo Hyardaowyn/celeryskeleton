@@ -82,3 +82,14 @@ def test_3(self):
             countdown=((self.request.retries + 1) * 120),  # Exponential backoff, max 480 seconds
             max_retries=3
         )
+
+@app.task(bind=True)
+def test_4(self):
+    try:
+        raise Exception("Something went wrong!")
+    except Exception as exc:
+        raise self.retry(
+            exc=exc,
+            countdown=((self.request.retries + 1) * 1200),  # Exponential backoff, max 480 seconds
+            max_retries=3
+        )
