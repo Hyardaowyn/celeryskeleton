@@ -247,3 +247,20 @@ def task_with_short_backoff_max(self):
     else:
         print("Task was successful!")
         time.sleep(10)
+
+@app.task(
+    bind=True,
+    max_retries=2,
+    retry_backoff=120,
+    retry_backoff_max=480 + 1,
+    retry_jitter=False,
+    autoretry_for=(Exception,)
+)
+def task_with_a_lot_of_retries(self):
+    if self.request.retries != 1:
+        raise Exception("Something went wrong!")
+    else:
+        print("Task was successful!")
+
+for i in range(5):
+    task_with_auto_retry.delay()
