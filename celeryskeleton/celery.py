@@ -204,3 +204,17 @@ def task_with_retry_on_diff_queue(self):
     else:
         print("Task was successful!")
         time.sleep(10)
+
+@app.task(
+    bind=True,
+    track_started=True,
+    max_retries=3,
+    retry_backoff=60,
+    retry_backoff_max=480 +1,
+    retry_jitter=(1),
+    autoretry_for=(Exception,),
+)
+def task_with_jitter(self):
+    print("Starting Task")
+    time.sleep(5)
+    raise Exception('This is an exception')
