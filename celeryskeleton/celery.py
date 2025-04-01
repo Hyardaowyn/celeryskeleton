@@ -65,3 +65,20 @@ def task_with_auto_retry(self):
         raise Exception("Something went wrong!")
     else:
         print("Task completed successfully")
+
+@app.task(bind=True)
+def test_3(self):
+    try:
+        print("Start task" + self.request.id)
+        myint = random.randint(1, 5)
+        if myint != 1:
+            time.sleep(60)
+            raise Exception("Something went wrong!")
+        else:
+            print("Task completed successfully!!")
+    except Exception as exc:
+        raise self.retry(
+            exc=exc,
+            countdown=((self.request.retries + 1) * 120),  # Exponential backoff, max 480 seconds
+            max_retries=3
+        )
