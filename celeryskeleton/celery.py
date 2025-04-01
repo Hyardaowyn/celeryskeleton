@@ -230,3 +230,20 @@ def long_running_task(self):
     print('Start a long-running task')
     time.sleep(240)
     print('End the long-running task')
+
+@app.task(bind=True,
+          max_retries=1,
+          retry_backoff=120,
+          retry_backoff_max=10 + 1,
+          retry_jitter=False,
+          autoretry_for=(Exception,)
+          )
+def task_with_short_backoff_max(self):
+    myint = random.randint(1, 5)
+    if myint != 1:
+        print('Task has failed!')
+        time.sleep(30)
+        raise Exception("Raising exception!!")
+    else:
+        print("Task was successful!")
+        time.sleep(10)
