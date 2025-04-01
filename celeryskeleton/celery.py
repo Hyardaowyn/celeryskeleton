@@ -48,3 +48,20 @@ def test_1(self):
     logger.debug("Start sleep")
     time.sleep(30)
     logger.debug("End sleep")
+
+@app.task(
+    bind=True,
+    max_retries=3,
+    retry_backoff=120,
+    retry_backoff_max=480 + 1,
+    retry_jitter=False,
+    autoretry_for=(Exception,)
+)
+def task_with_auto_retry(self):
+    print("Start task " + self.request.id)
+    myint = random.randint(1, 5)
+    if myint != 1:
+        time.sleep(60)
+        raise Exception("Something went wrong!")
+    else:
+        print("Task completed successfully")
