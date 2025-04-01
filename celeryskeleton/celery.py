@@ -41,3 +41,10 @@ def exponential(self):
         raise Exception("Something went wrong!")
     else:
         print("Task completed successfully")
+
+
+@app.task(bind=True)
+def test_1(self):
+    logger.debug("Start sleep")
+    time.sleep(30)
+    logger.debug("End sleep")
