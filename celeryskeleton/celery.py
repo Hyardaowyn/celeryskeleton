@@ -112,3 +112,19 @@ def task_with_catch(self):
     except Exception as exc:
         print("Caught the Exception!")
         #raise Exception Used in the second run in task 5
+
+@app.task(bind=True,
+          max_retries=3,
+          retry_backoff=120,
+          retry_backoff_max=480 + 1,
+          retry_jitter=False,
+          autoretry_for=(Exception,)
+          )
+def test_6(self):
+    myint = random.randint(1, 5)
+    if myint != 1:
+        time.sleep(30)
+        test = 1 / 0
+    else:
+        time.sleep(30)
+        print("Task was successful!")
