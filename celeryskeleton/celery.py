@@ -32,3 +32,12 @@ def sleep_task(self):
     time.sleep(5)
     logger.error("end sleep")
 
+
+@app.task(bind=True, max_retries=10, autoretry_for=(Exception,), retry_backoff=True)
+def exponential(self):
+    myint = random.randint(3, 15)
+    if myint != 3:
+        time.sleep(5)
+        raise Exception("Something went wrong!")
+    else:
+        print("Task completed successfully")
