@@ -128,3 +128,21 @@ def test_6(self):
     else:
         time.sleep(30)
         print("Task was successful!")
+
+@app.task(
+    bind=True,
+    max_retries=2,
+    retry_backoff=120,
+    retry_jitter=False,
+    autoretry_for=(Exception,)
+)
+def task_without_ack(self):
+    print("Start a new task")
+    myint = random.randint(1, 5)
+    if myint != 1:
+        print("Task has failed!")
+        time.sleep(120)
+        raise Exception("Raising exception!!")
+    else:
+        time.sleep(30)
+        print("Task was successful!")
