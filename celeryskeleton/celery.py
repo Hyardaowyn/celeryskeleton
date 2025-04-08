@@ -32,7 +32,6 @@ def sleep_task(self):
     time.sleep(5)
     logger.error("end sleep")
 
-
 @app.task(bind=True, max_retries=10, autoretry_for=(Exception,), retry_backoff=True)
 def exponential(self):
     myint = random.randint(3, 15)
@@ -42,11 +41,10 @@ def exponential(self):
     else:
         print("Task completed successfully")
 
-
 @app.task(bind=True)
-def test_1(self):
+def task_worker_prefetch_multiplier(self):
     logger.debug("Start sleep")
-    time.sleep(30)
+    time.sleep(60)
     logger.debug("End sleep")
 
 @app.task(
@@ -67,9 +65,9 @@ def task_with_auto_retry(self):
         print("Task completed successfully")
 
 @app.task(bind=True)
-def test_3(self):
+def self_retry_task1(self):
     try:
-        print("Start task" + self.request.id)
+        print("Start task1 "  + self.request.id)
         myint = random.randint(1, 5)
         if myint != 1:
             time.sleep(60)
@@ -80,11 +78,80 @@ def test_3(self):
         raise self.retry(
             exc=exc,
             countdown=((self.request.retries + 1) * 120),  # Exponential backoff, max 480 seconds
-            max_retries=3
+            max_retries=2
         )
 
 @app.task(bind=True)
-def test_4(self):
+def self_retry_task2(self):
+    try:
+        print("Start task2 " + self.request.id)
+        myint = random.randint(1, 5)
+        if myint != 1:
+            time.sleep(60)
+            raise Exception("Something went wrong!")
+        else:
+            print("Task completed successfully!!")
+    except Exception as exc:
+        raise self.retry(
+            exc=exc,
+            countdown=((self.request.retries + 1) * 120),  # Exponential backoff, max 480 seconds
+            max_retries=2
+        )
+
+@app.task(bind=True)
+def self_retry_task3(self):
+    try:
+        print("Start task3 " + self.request.id)
+        myint = random.randint(1, 5)
+        if myint != 1:
+            time.sleep(60)
+            raise Exception("Something went wrong!")
+        else:
+            print("Task completed successfully!!")
+    except Exception as exc:
+        raise self.retry(
+            exc=exc,
+            countdown=((self.request.retries + 1) * 120),  # Exponential backoff, max 480 seconds
+            max_retries=2
+        )
+
+@app.task(bind=True)
+def self_retry_task4(self):
+    try:
+        print("Start task 1" + self.request.id)
+        myint = random.randint(1, 5)
+        if myint != 1:
+            time.sleep(60)
+            raise Exception("Something went wrong!")
+        else:
+            print("Task completed successfully!!")
+    except Exception as exc:
+        raise self.retry(
+            exc=exc,
+            countdown=((self.request.retries + 1) * 120),  # Exponential backoff, max 480 seconds
+            max_retries=2
+        )
+
+@app.task(bind=True)
+def self_retry_task5(self):
+    try:
+        print("Start task5 " + self.request.id)
+        myint = random.randint(1, 5)
+        if myint != 1:
+            time.sleep(60)
+            raise Exception("Something went wrong!")
+        else:
+            print("Task completed successfully!!")
+    except Exception as exc:
+        raise self.retry(
+            exc=exc,
+            countdown=((self.request.retries + 1) * 120),  # Exponential backoff, max 480 seconds
+            max_retries=2
+        )
+
+
+@app.task(bind=True)
+def task_limit_internal_queue(self):
     try:
         raise Exception("Something went wrong!")
     except Exception as exc:
@@ -101,7 +168,7 @@ def test_4(self):
           retry_jitter=False,
           autoretry_for=(Exception,)
           )
-def task_with_catch(self):
+def task_with_catch_without_raise(self):
     try:
         myint = random.randint(1, 5)
         if myint != 1:
@@ -111,7 +178,25 @@ def task_with_catch(self):
             print("Task completed successfully")
     except Exception as exc:
         print("Caught the Exception!")
-        #raise Exception Used in the second run in task 5
+
+@app.task(bind=True,
+          max_retries=3,
+          retry_backoff=120,
+          retry_backoff_max=480 + 1,
+          retry_jitter=False,
+          autoretry_for=(Exception,)
+          )
+def task_with_catch_with_raise(self):
+    try:
+        myint = random.randint(1, 5)
+        if myint != 1:
+            time.sleep(30)
+            raise Exception("Something went wrong!")
+        else:
+            print("Task completed successfully")
+    except Exception as exc:
+        print("Caught the Exception!")
+        raise Exception
 
 @app.task(bind=True,
           max_retries=3,
@@ -146,6 +231,24 @@ def task_without_ack(self):
     else:
         time.sleep(30)
         print("Task was successful!")
+
+
+@app.task(
+    bind=True,
+    max_retries=3,
+    retry_backoff=60,
+    retry_jitter=False,
+    autoretry_for=(Exception,)
+)
+def task_without_exception_catch(self):
+    myint = random.randint(1, 5)
+    if myint != 1:
+        time.sleep(60)
+        test =  1/0
+    else:
+        time.sleep(60)
+        print("Task Was successful!")
+
 
 @app.task(
     max_retries=2,
@@ -262,5 +365,4 @@ def task_with_a_lot_of_retries(self):
     else:
         print("Task was successful!")
 
-for i in range(5):
-    task_with_auto_retry.delay()
+long_running_task.delay()
